@@ -1,0 +1,13 @@
+<!-- This is an example launch file for how a ROS application could use a cloudwatch_metrics_collector -->
+
+<launch>
+    <!-- Custom Nodes would be launched here -->
+
+    <arg name="config_file" default="$(find cloudwatch_metrics_collector)/config/sample_configuration.yaml"/>
+
+    <include file="$(find cloudwatch_metrics_collector)/launch/cloudwatch_metrics_collector.launch" >
+        <!-- The configuration can either be passed in using the "config_file" parameter or by using a rosparam tag
+                to load the config into the parameter server -->
+        <arg name="config_file" value="$(arg config_file)"/>
+    </include>
+</launch>

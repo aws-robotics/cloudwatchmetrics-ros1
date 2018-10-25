@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>cloudwatch_metrics_collector</name>
+  <version>1.0.0</version>
+  <description>Subscriber node for the aws/monitoring topic to publish metrics to AWS Cloudwatch</description>
+  <url>http://wiki.ros.org/cloudwatch_metrics_collector</url>
+
+  <author email="ros-contributions@amazon.com">AWS RoboMaker</author>
+  <maintainer email="ros-contributions@amazon.com">AWS RoboMaker</maintainer>
+
+  <license>Apache 2.0</license>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>ros_monitoring_msgs</build_depend>
+  <build_depend>cloudwatch_metrics_common</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>aws_common</build_depend>
+  <build_depend>aws_ros1_common</build_depend>
+
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>cloudwatch_metrics_common</build_export_depend>
+  <build_export_depend>ros_monitoring_msgs</build_export_depend>
+  <build_export_depend>aws_ros1_common</build_export_depend>
+
+  <exec_depend>aws_ros1_common</exec_depend>
+  <exec_depend>ros_monitoring_msgs</exec_depend>
+  <exec_depend>cloudwatch_metrics_common</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+</package>

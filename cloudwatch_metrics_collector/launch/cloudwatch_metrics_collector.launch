@@ -1,0 +1,50 @@
+<!--
+    This is the launch file to use when you want to launch a Metrics Node that has the ability to automatically hook into
+    the AWS RoboMaker ecosystem. Modifying this file may prevent the RoboMaker system from being able to automatically pick up Metrics
+    coming from this node.
+
+    @param node_name (optional) If provided, the value will be set as the name of the node when it is launched. The
+        default value is 'cloudwatch_metrics_collector'
+    @param config_file (optional) If provided, rosparam will attempt to load the file into the private namespace
+        of the node.
+-->
+
+<launch>
+    <!-- If a node_name argument is provided by the caller then we will set the metric node's name to that value -->
+    <arg name="node_name" default="cloudwatch_metrics_collector" />
+    <!-- If a config file argument is provided by the caller then we will load it into the node's namespace -->
+    <arg name="config_file" default="" />
+
+    <!-- These are the arguments provided by the AWS RoboMaker system as environment variables. They are optional arguments that
+            are only expected to be set if the ROS application is being launched from RoboMaker. If these arguments
+            exist then we will use them to override the node configuration from the config_file or default values. These
+            are required hooks for the RoboMaker console to be able to automatically hook into metrics that are published from
+            this node-->
+    <arg name="aws_robomaker_metric_namespace" value="$(optenv AWS_ROBOMAKER_CAPABILITY)"/>
+    <arg name="aws_robomaker_robot_name" value="$(optenv AWS_ROBOMAKER_ROBOT_NAME)"/>
+    <arg name="aws_robomaker_simulation_job_id" value="$(optenv AWS_ROBOMAKER_SIMULATION_JOB_ID)"/>
+
+    <!-- If this is the RoboMaker Fleet Management environment then add the robot name as a default dimension -->
+    <arg if="$(eval aws_robomaker_metric_namespace == 'AWSRoboMakerFleetManagement')"
+          name="aws_default_metric_dimensions"
+          value="$(eval ('RobotName:' + aws_robomaker_robot_name) if (aws_robomaker_robot_name != '') else '')" />
+
+    <!-- If this is the RoboMaker Simulation environment then add the simulation job id as a default dimension -->
+    <arg if="$(eval aws_robomaker_metric_namespace == 'AWSRoboMakerSimulation')"
+          name="aws_default_metric_dimensions"
+          value="$(eval ('SimulationJobId:' + aws_robomaker_simulation_job_id) if (aws_robomaker_simulation_job_id != '') else '')" />
+
+    <!-- Set a default value for aws_default_metric_dimensions when not running in a RoboMaker environment -->
+    <arg if="$(eval (aws_robomaker_metric_namespace != 'AWSRoboMakerFleetManagement') and (aws_robomaker_metric_namespace != 'AWSRoboMakerSimulation'))"
+          name="aws_default_metric_dimensions"
+          value="" />
+
+    <node name="$(arg node_name)" pkg="cloudwatch_metrics_collector" type="cloudwatch_metrics_collector">
+        <!-- If the caller specified a config file then load it here. -->
+        <rosparam if="$(eval config_file!='')" command="load" file="$(arg config_file)"/>
+
+        <!-- If RoboMaker arguments were provided then override the node's parameters to use the values provided by RoboMaker -->
+        <param if="$(eval aws_robomaker_metric_namespace!='')" name="aws_metrics_namespace" value="$(arg aws_robomaker_metric_namespace)"/>
+        <param if="$(eval aws_default_metric_dimensions!='')" name="aws_default_metric_dimensions" value="$(arg aws_default_metric_dimensions)"/>
+    </node>
+</launch>
