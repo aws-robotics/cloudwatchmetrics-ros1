@@ -28,4 +28,6 @@
   <exec_depend>ros_monitoring_msgs</exec_depend>
   <exec_depend>cloudwatch_metrics_common</exec_depend>
   <exec_depend>roscpp</exec_depend>
+  
+  <test_depend>rostest</test_depend>
 </package>
