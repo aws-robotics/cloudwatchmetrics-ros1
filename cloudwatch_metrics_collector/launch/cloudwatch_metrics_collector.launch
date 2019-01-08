@@ -14,6 +14,8 @@
     <arg name="node_name" default="cloudwatch_metrics_collector" />
     <!-- If a config file argument is provided by the caller then we will load it into the node's namespace -->
     <arg name="config_file" default="" />
+    <!-- The output argument sets the node's stdout/stderr location. Set to 'screen' to see this node's output in the terminal. -->
+    <arg name="output" default="log" />
 
     <!-- These are the arguments provided by the AWS RoboMaker system as environment variables. They are optional arguments that
             are only expected to be set if the ROS application is being launched from RoboMaker. If these arguments
@@ -39,7 +41,7 @@
           name="aws_default_metric_dimensions"
           value="" />
 
-    <node name="$(arg node_name)" pkg="cloudwatch_metrics_collector" type="cloudwatch_metrics_collector">
+    <node name="$(arg node_name)" pkg="cloudwatch_metrics_collector" type="cloudwatch_metrics_collector" output="$(arg output)">
         <!-- If the caller specified a config file then load it here. -->
         <rosparam if="$(eval config_file!='')" command="load" file="$(arg config_file)"/>
 
