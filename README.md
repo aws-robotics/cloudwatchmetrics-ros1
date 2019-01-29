@@ -34,6 +34,12 @@ You will need to create an AWS Account and configure the credentials to be able 
 This node will require the following AWS account IAM role permissions:
 - `cloudwatch:PutMetricData`
 
+### Binaries
+On Ubuntu you can install the latest version of this package using the following command
+
+        sudo apt-get update
+        sudo apt-get install -y ros-kinetic-cloudwatch-metrics-collector
+
 ### Building from Source
 
 To build from source you'll need to create a new workspace, clone and checkout the latest release branch of this repository, install all the dependencies, and compile. If you need the latest development features you can clone from the `master` branch instead of the latest release branch. While we guarantee the release branches are stable, the `master` should be considered to have an unstable build due to ongoing development. 
@@ -42,17 +48,21 @@ To build from source you'll need to create a new workspace, clone and checkout t
 
     mkdir -p ~/ros-workspace/src
 
-- Clone the package into the source directory (replace `release-v1` with the latest release branch. 
+- Clone the package into the source directory . 
+
+_Note: Replace __`{MAJOR.VERSION}`__ below with the latest major version number to get the latest release branch._
 
         cd ~/ros-workspace/src
         git clone https://github.com/aws-robotics/cloudwatchmetrics-ros1.git
-        git checkout release-v1
+        git checkout release-v{MAJOR.VERSION}
 
 - Install dependencies
 
         cd ~/ros-workspace 
         sudo apt-get update && rosdep update
         rosdep install --from-paths src --ignore-src -r -y
+        
+_Note: If building the master branch instead of a release branch you may need to also checkout and build the master branches of the packages this package depends on._
 
 - Build the packages
 
