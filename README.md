@@ -53,8 +53,7 @@ To build from source you'll need to create a new workspace, clone and checkout t
 _Note: Replace __`{MAJOR.VERSION}`__ below with the latest major version number to get the latest release branch._
 
         cd ~/ros-workspace/src
-        git clone https://github.com/aws-robotics/cloudwatchmetrics-ros1.git
-        git checkout release-v{MAJOR.VERSION}
+        git clone https://github.com/aws-robotics/cloudwatchmetrics-ros1.git -b release-v{MAJOR.VERSION}
 
 - Install dependencies
 
