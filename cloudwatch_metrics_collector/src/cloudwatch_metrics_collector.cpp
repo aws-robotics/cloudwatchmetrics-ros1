@@ -35,8 +35,10 @@
 #include <string>
 #include <vector>
 
-using namespace Aws::CloudWatch::Metrics;
+using namespace Aws::Client;
 using namespace Aws::Utils::Logging;
+using namespace Aws::CloudWatch::Metrics;
+
 
 const std::string MetricsCollector::kNodeParamMonitorTopicsListKey = "aws_monitored_metric_topics";
 const std::string MetricsCollector::kNodeParamMetricNamespaceKey = "aws_metrics_namespace";
@@ -51,6 +53,7 @@ const int MetricsCollector::kNodeDefaultMetricDatumStorageResolution = 60;
 const std::string MetricsCollector::kNodeParamMetricDatumStorageResolutionKey =
   "storage_resolution";
 const std::set<int> MetricsCollector::kNodeParamMetricDatumStorageResolutionValidValues = {1, 60};
+
 
 MetricsCollector::MetricsCollector(std::shared_ptr<MetricManager> metric_manager,
                                    std::map<std::string, std::string> && default_dimensions)
@@ -119,9 +122,9 @@ Aws::AwsError MetricsCollector::SubscribeAllTopics(ros::NodeHandle & nh)
 
 MetricsCollector MetricsCollector::Build(Aws::AwsError & status)
 {
-  auto param_reader = std::make_shared<Aws::Client::Ros1NodeParameterReader>();
-  Aws::Client::ClientConfigurationProvider client_config_provider(param_reader);
-  Aws::Client::ClientConfiguration client_config = client_config_provider.GetClientConfiguration();
+  auto param_reader = std::make_shared<Ros1NodeParameterReader>();
+  ClientConfigurationProvider client_config_provider(param_reader);
+  ClientConfiguration client_config = client_config_provider.GetClientConfiguration();
 
   Aws::SDKOptions sdk_options;
   MetricManagerFactory mm_factory;
@@ -131,7 +134,7 @@ MetricsCollector MetricsCollector::Build(Aws::AwsError & status)
 
   // Load the metric namespace
   Aws::AwsError read_namespace_status =
-    param_reader->ReadStdString(kNodeParamMetricNamespaceKey.c_str(), metric_namespace);
+    param_reader->ReadParam(ParameterPath(kNodeParamMetricNamespaceKey), metric_namespace);
   if (Aws::AWS_ERR_OK == read_namespace_status) {
     AWS_LOGSTREAM_INFO(__func__, "Namespace: " << metric_namespace);
   } else {
@@ -143,7 +146,7 @@ MetricsCollector MetricsCollector::Build(Aws::AwsError & status)
   // Load the storage resolution
   int storage_resolution = kNodeDefaultMetricDatumStorageResolution;
   Aws::AwsError read_storage_resolution_status =
-    param_reader->ReadInt(kNodeParamMetricDatumStorageResolutionKey.c_str(), storage_resolution);
+    param_reader->ReadParam(ParameterPath(kNodeParamMetricDatumStorageResolutionKey), storage_resolution);
   if (Aws::AWS_ERR_OK == read_storage_resolution_status) {
     if (kNodeParamMetricDatumStorageResolutionValidValues.find(storage_resolution) ==
         kNodeParamMetricDatumStorageResolutionValidValues.end()) {
@@ -165,7 +168,7 @@ MetricsCollector MetricsCollector::Build(Aws::AwsError & status)
 
   // Load the default dimensions
   Aws::AwsError read_dimensions_status =
-    param_reader->ReadString(kNodeParamDefaultMetricDimensionsKey.c_str(), dimensions_param);
+    param_reader->ReadParam(ParameterPath(kNodeParamDefaultMetricDimensionsKey), dimensions_param);
   Aws::OStringStream logging_stream;
   logging_stream << "Default Metric Dimensions: { ";
   if (Aws::AWS_ERR_OK == read_dimensions_status) {
