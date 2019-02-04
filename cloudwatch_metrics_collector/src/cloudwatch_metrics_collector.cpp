@@ -37,8 +37,11 @@
 
 using namespace Aws::Client;
 using namespace Aws::Utils::Logging;
-using namespace Aws::CloudWatch::Metrics;
 
+
+namespace Aws {
+namespace CloudWatch {
+namespace Metrics {
 
 const std::string MetricsCollector::kNodeParamMonitorTopicsListKey = "aws_monitored_metric_topics";
 const std::string MetricsCollector::kNodeParamMetricNamespaceKey = "aws_metrics_namespace";
@@ -211,17 +214,23 @@ Aws::AwsError MetricsCollector::Initialize(ros::NodeHandle & nh)
   return status;
 }
 
+}  // namespace Metrics
+}  // namespace CloudWatch
+}  // namespace Aws
+
+
 int main(int argc, char * argv[])
 {
-  ros::init(argc, argv, MetricsCollector::kNodeName);
+  ros::init(argc, argv, Aws::CloudWatch::Metrics::MetricsCollector::kNodeName);
 
   ros::NodeHandle nh;
 
-  Aws::Utils::Logging::InitializeAWSLogging(
-    Aws::MakeShared<Aws::Utils::Logging::AWSROSLogger>(MetricsCollector::kNodeName.c_str()));
+  Aws::Utils::Logging::InitializeAWSLogging(Aws::MakeShared<Aws::Utils::Logging::AWSROSLogger>(
+    Aws::CloudWatch::Metrics::MetricsCollector::kNodeName.c_str()));
   Aws::AwsError status;
 
-  MetricsCollector metrics_collector = MetricsCollector::Build(status);
+  Aws::CloudWatch::Metrics::MetricsCollector metrics_collector
+    = Aws::CloudWatch::Metrics::MetricsCollector::Build(status);
   if (Aws::AWS_ERR_OK == status) {
     status = metrics_collector.Initialize(nh);
   }
