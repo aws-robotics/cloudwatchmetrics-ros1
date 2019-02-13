@@ -60,14 +60,11 @@ install(DIRECTORY
 ## Add gtest based cpp test target and link libraries
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  include_directories(/usr/include/gmock /usr/src/gmock)
-  add_library(libgmock /usr/src/gmock/src/gmock-all.cc)
-
   SET(CW_METRICS_COLLECTOR_TEST test_cloudwatch_metrics_collector)
-  add_rostest_gtest(${CW_METRICS_COLLECTOR_TEST}
+  add_rostest_gmock(${CW_METRICS_COLLECTOR_TEST}
     test/test_cloudwatch_metrics_collector.test
     test/cloudwatch_metrics_collector_test.cpp)
   target_include_directories(${CW_METRICS_COLLECTOR_TEST} PRIVATE include ${catkin_INCLUDE_DIRS}
     ${cloudwatch_metrics_collector_INCLUDE_DIRS})
-  target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib libgmock ${catkin_LIBRARIES})
+  target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 endif()
