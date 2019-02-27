@@ -71,8 +71,7 @@ void MetricsCollector::ReceiveMetricCallback(
 
   for (auto metric_msg = metric_list_msg->metrics.begin();
        metric_msg != metric_list_msg->metrics.end(); ++metric_msg) {
-    int64_t timestamp =
-      ((int64_t)metric_msg->time_stamp.sec * 1000) + ((int64_t)metric_msg->time_stamp.nsec / 1000);
+    int64_t timestamp = metric_msg->time_stamp.toNSec() / 1000000;
     std::map<std::string, std::string> dimensions;
     Aws::AwsError status = Aws::AWS_ERR_OK;
     for (auto it = default_dimensions_.begin(); it != default_dimensions_.end(); ++it) {
