@@ -59,12 +59,33 @@ install(DIRECTORY
 
 ## Add gtest based cpp test target and link libraries
 if(CATKIN_ENABLE_TESTING)
+  set(CW_METRICS_COLLECTOR_TEST test_cloudwatch_metrics_collector)
   find_package(rostest REQUIRED)
-  SET(CW_METRICS_COLLECTOR_TEST test_cloudwatch_metrics_collector)
-  add_rostest_gmock(${CW_METRICS_COLLECTOR_TEST}
-    test/test_cloudwatch_metrics_collector.test
-    test/cloudwatch_metrics_collector_test.cpp)
-  target_include_directories(${CW_METRICS_COLLECTOR_TEST} PRIVATE include ${catkin_INCLUDE_DIRS}
-    ${cloudwatch_metrics_collector_INCLUDE_DIRS})
-  target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES})
+  find_package(GMock QUIET)
+  if(GMOCK_FOUND)
+    add_rostest_gmock(${CW_METRICS_COLLECTOR_TEST}
+      test/test_cloudwatch_metrics_collector.test
+      test/cloudwatch_metrics_collector_test.cpp
+    )
+    target_include_directories(${CW_METRICS_COLLECTOR_TEST} PRIVATE
+      include
+      ${catkin_INCLUDE_DIRS}
+      ${cloudwatch_metrics_collector_INCLUDE_DIRS}
+      ${GMOCK_INCLUDE_DIRS}
+    )
+    target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${GMOCK_BOTH_LIBRARIES})
+  else()
+    include_directories(/usr/include/gmock /usr/src/gmock)
+    add_library(${PROJECT_NAME}_libgmock /usr/src/gmock/src/gmock-all.cc)
+    add_rostest_gtest(${CW_METRICS_COLLECTOR_TEST}
+      test/test_cloudwatch_metrics_collector.test
+      test/cloudwatch_metrics_collector_test.cpp
+    )
+    target_include_directories(${CW_METRICS_COLLECTOR_TEST} PRIVATE
+      include
+      ${catkin_INCLUDE_DIRS}
+      ${cloudwatch_metrics_collector_INCLUDE_DIRS}
+    )   
+    target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${PROJECT_NAME}_libgmock)
+  endif()
 endif()
