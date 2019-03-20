@@ -2,8 +2,8 @@
 Changelog for package cloudwatch_metrics_collector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2019-03-20)
+------------------
 * fix broken build when cmake/rostest cannot find the gmock library (`#13 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/13>`_)
 * Fix timestamp conversion bug `#10 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/10>`_
 * Update CMakeLists.txt
