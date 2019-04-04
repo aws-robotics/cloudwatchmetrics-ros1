@@ -21,6 +21,7 @@
 
 #include <cloudwatch_metrics_collector/metrics_collector.hpp>
 #include <cloudwatch_metrics_common/metric_manager.hpp>
+#include <ros_monitoring_msgs/MetricData.h>
 
 using namespace Aws::CloudWatch::Metrics;
 
@@ -78,6 +79,29 @@ protected:
     return metric_data;
   }
 };
+
+struct GetMetricDataEpochMillisTestDatum {
+  ros::Time input_time; 
+  int64_t expected_timestamp;
+};
+class GetMetricDataEpochMillisFixture : public ::testing::TestWithParam<GetMetricDataEpochMillisTestDatum> {};
+TEST_P(GetMetricDataEpochMillisFixture, getMetricDataEpochMillisTestOk)
+{
+  ros_monitoring_msgs::MetricData metric_msg;
+  metric_msg.time_stamp = GetParam().input_time;
+  EXPECT_EQ(GetParam().expected_timestamp, MetricsCollector::GetMetricDataEpochMillis(metric_msg));
+}
+const GetMetricDataEpochMillisTestDatum getMetricDataEpochMillisTestData [] = {
+  GetMetricDataEpochMillisTestDatum{ros::Time(0,0), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(10,0), 10 * 1000},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0,1), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0,999999), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(1,999999), 1000},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0,1000000), 1},
+  GetMetricDataEpochMillisTestDatum{ros::Time(1,1000000), 1001}
+};
+INSTANTIATE_TEST_CASE_P(getMetricDataEpochMillisTest, GetMetricDataEpochMillisFixture, 
+  ::testing::ValuesIn(getMetricDataEpochMillisTestData));
 
 TEST_F(MetricsCollectorFixture, timerCallsMetricManagerService)
 {
