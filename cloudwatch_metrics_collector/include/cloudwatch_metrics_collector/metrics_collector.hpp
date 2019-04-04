@@ -18,6 +18,7 @@
 #include <aws_common/sdk_utils/logging/aws_log_system.h>
 #include <ros/ros.h>
 #include <ros_monitoring_msgs/MetricList.h>
+#include <ros_monitoring_msgs/MetricData.h>
 
 #include <cloudwatch_metrics_common/metric_manager.hpp>
 
@@ -62,6 +63,11 @@ public:
   Aws::AwsError Initialize(ros::NodeHandle & nh);
 
   static MetricsCollector Build(Aws::AwsError & status);
+
+  /**
+   * Gets the timestamp for the input metric message as milliseconds since epoch
+   */
+  static int64_t GetMetricDataEpochMillis(const ros_monitoring_msgs::MetricData & metric_msg);
 
 private:
   std::shared_ptr<MetricManager> metric_manager_ = nullptr;
