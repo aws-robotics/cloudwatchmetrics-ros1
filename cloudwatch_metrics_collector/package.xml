@@ -10,7 +10,6 @@
 
   <license>Apache 2.0</license>
 
-
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>ros_monitoring_msgs</build_depend>
@@ -28,6 +27,8 @@
   <exec_depend>ros_monitoring_msgs</exec_depend>
   <exec_depend>cloudwatch_metrics_common</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  
+
+  <test_depend>gtest</test_depend>
+  <test_depend>google-mock</test_depend>
   <test_depend>rostest</test_depend>
 </package>

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(cloudwatch_metrics_collector)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-#add_compile_options(-std=c++17)
 set(CMAKE_CXX_STANDARD 14)
 
 ## Find catkin macros and libraries
@@ -49,9 +48,10 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 install(DIRECTORY
-    config
-    launch
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+  config
+  launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 #############
 ## Testing ##
@@ -73,10 +73,15 @@ if(CATKIN_ENABLE_TESTING)
       ${cloudwatch_metrics_collector_INCLUDE_DIRS}
       ${GMOCK_INCLUDE_DIRS}
     )
-    target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${GMOCK_BOTH_LIBRARIES})
+    target_link_libraries(${CW_METRICS_COLLECTOR_TEST}
+      ${PROJECT_NAME}_lib
+      ${catkin_LIBRARIES}
+      ${GMOCK_BOTH_LIBRARIES}
+    )
   else()
     include_directories(/usr/include/gmock /usr/src/gmock)
-    add_library(${PROJECT_NAME}_libgmock /usr/src/gmock/src/gmock-all.cc)
+    add_library(${PROJECT_NAME}_libgmock SHARED /usr/src/gmock/src/gmock-all.cc)
+
     add_rostest_gtest(${CW_METRICS_COLLECTOR_TEST}
       test/test_cloudwatch_metrics_collector.test
       test/cloudwatch_metrics_collector_test.cpp
@@ -86,6 +91,10 @@ if(CATKIN_ENABLE_TESTING)
       ${catkin_INCLUDE_DIRS}
       ${cloudwatch_metrics_collector_INCLUDE_DIRS}
     )   
-    target_link_libraries(${CW_METRICS_COLLECTOR_TEST} ${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${PROJECT_NAME}_libgmock)
+    target_link_libraries(${CW_METRICS_COLLECTOR_TEST}
+      ${PROJECT_NAME}_lib
+      ${catkin_LIBRARIES}
+      ${PROJECT_NAME}_libgmock
+    )
   endif()
 endif()
