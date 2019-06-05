@@ -251,52 +251,6 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDefaultDimensions)
   ros::spinOnce();
 }
 
-TEST_F(MetricsCollectorFixture, customTopicsListened)
-{
-  std::vector<std::string> topics;
-  topics.push_back("metrics_topic0");
-  topics.push_back("metrics_topic1");
-  ros::param::set(MetricsCollector::kNodeParamMonitorTopicsListKey, topics);
-
-  std::shared_ptr<MetricManagerMock> metric_manager = std::make_shared<MetricManagerMock>();
-  EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
-  EXPECT_CALL(*metric_manager, RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(0),
-                                            ::testing::_, ::testing::_, ::testing::_))
-    .Times(1)
-    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
-  EXPECT_CALL(*metric_manager, RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(1),
-                                            ::testing::_, ::testing::_, ::testing::_))
-    .Times(1)
-    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
-
-  MetricsCollector metrics_collector =
-    MetricsCollector(metric_manager, std::move(default_metric_dims));
-  metrics_collector.Initialize(*node_handle);
-
-  ros_monitoring_msgs::MetricList metric_list_msg = ros_monitoring_msgs::MetricList();
-  ros_monitoring_msgs::MetricData metric_data = BasicMetricData();
-  ros::Publisher metrics_pub0 =
-    node_handle->advertise<ros_monitoring_msgs::MetricList>(topics[0].c_str(), 1);
-  metric_data.value = 0;
-  metric_data.time_stamp = ros::Time::now();
-  metric_list_msg.metrics.clear();
-  metric_list_msg.metrics.push_back(metric_data);
-  metrics_pub0.publish(metric_list_msg);
-  ros::spinOnce();
-  ros::Publisher metrics_pub1 =
-    node_handle->advertise<ros_monitoring_msgs::MetricList>(topics[1].c_str(), 1);
-  metric_data.value = 1;
-  metric_data.time_stamp = ros::Time::now();
-  metric_list_msg.metrics.clear();
-  metric_list_msg.metrics.push_back(metric_data);
-  metrics_pub1.publish(metric_list_msg);
-  ros::spinOnce();
-  std::this_thread::sleep_for(std::chrono::seconds(1));
-  ros::spinOnce();
-}
-
 int main(int argc, char ** argv)
 {
   testing::InitGoogleTest(&argc, argv);
