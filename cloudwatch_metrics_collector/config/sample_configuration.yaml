@@ -38,7 +38,8 @@ aws_client_configuration:
     # this value if you need to transfer large files, such as in Amazon S3 or Amazon CloudFront.
     request_timeout_ms: 2000
     connect_timeout_ms: 2000
-    max_retries: 10
+    max_retries: 1
+    no_retry_strategy: true
 
     # The maximum number of allowed connections to a single server for your HTTP communications. The default value is 25.
     # You can set this value as high as you can support the bandwidth. We recommend a value around 25.
