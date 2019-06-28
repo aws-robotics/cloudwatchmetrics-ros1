@@ -79,7 +79,7 @@ void ReadMetricNamespace(
   } else {
     AWS_LOGSTREAM_WARN(
             __func__,
-            "No namespace configuration found. Falling back to default namespace: " << metric_namespace);
+            "No namespace configuration found. Falling back to default namespace: " << kNodeDefaultMetricNamespace);
     metric_namespace = kNodeDefaultMetricNamespace;
   }
 }

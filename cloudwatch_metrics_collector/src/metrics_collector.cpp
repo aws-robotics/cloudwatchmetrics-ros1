@@ -70,7 +70,6 @@ void MetricsCollector::SubscribeAllTopics()
     ros::Subscriber sub = node_handle_.subscribe<ros_monitoring_msgs::MetricList>(
             *it, kNodeSubQueueSize,
             [this](const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg) -> void {
-              printf("recording metric\n");
                 this->RecordMetrics(metric_list_msg);
             });
     subscriptions_.push_back(sub);
@@ -120,7 +119,6 @@ int64_t MetricsCollector::GetMetricDataEpochMillis(const ros_monitoring_msgs::Me
 void MetricsCollector::TriggerPublish(const ros::TimerEvent &)
 {
   AWS_LOG_DEBUG(__func__, "Flushing metrics");
-  printf("triggerpung publish\n");
   this->metric_service_->publishBatchedData();
 }
 
