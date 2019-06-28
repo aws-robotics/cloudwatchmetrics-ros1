@@ -71,7 +71,6 @@ void MetricsCollector::ReceiveMetricCallback(
 
   for (auto metric_msg = metric_list_msg->metrics.begin();
        metric_msg != metric_list_msg->metrics.end(); ++metric_msg) {
-    int64_t timestamp = metric_msg->time_stamp.toNSec() / 1000000;
     std::map<std::string, std::string> dimensions;
     Aws::AwsError status = Aws::AWS_ERR_OK;
     for (auto it = default_dimensions_.begin(); it != default_dimensions_.end(); ++it) {
@@ -84,11 +83,17 @@ void MetricsCollector::ReceiveMetricCallback(
     }
     AWS_LOGSTREAM_DEBUG(__func__, "Recording metric with name=[" << metric_msg->metric_name << "]");
     status = metric_manager_->RecordMetric(metric_msg->metric_name, metric_msg->value,
-                                           metric_msg->unit, timestamp, dimensions);
+                                           metric_msg->unit, GetMetricDataEpochMillis(*metric_msg), 
+                                           dimensions);
     if (Aws::AWS_ERR_OK != status) {
       AWS_LOGSTREAM_ERROR(__func__, "Failed to record metric: " << status);
     }
   }
+}
+
+int64_t MetricsCollector::GetMetricDataEpochMillis(const ros_monitoring_msgs::MetricData & metric_msg)
+{
+  return metric_msg.time_stamp.toNSec() / 1000000;
 }
 
 void MetricsCollector::ServiceMetricManagerCallback(const ros::TimerEvent &)
