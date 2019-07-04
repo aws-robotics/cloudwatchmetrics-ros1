@@ -52,6 +52,7 @@ void MetricsCollector::Initialize(std::string metric_namespace,
                          ros::NodeHandle node_handle,
                          const Aws::Client::ClientConfiguration & config,
                          const Aws::SDKOptions & sdk_options,
+                         const Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options,
                          std::shared_ptr<MetricServiceFactory> metric_service_factory) {
 
   this->metric_namespace_ = metric_namespace;
@@ -60,7 +61,8 @@ void MetricsCollector::Initialize(std::string metric_namespace,
   this->node_handle_ = node_handle;
   this->metric_service_ = metric_service_factory->createMetricService(this->metric_namespace_,
                                                                       config,
-                                                                      sdk_options);
+                                                                      sdk_options,
+                                                                      cloudwatch_options);
 }
 
 void MetricsCollector::SubscribeAllTopics()

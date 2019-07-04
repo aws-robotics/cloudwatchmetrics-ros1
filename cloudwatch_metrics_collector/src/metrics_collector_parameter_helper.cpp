@@ -20,6 +20,7 @@
 #include <iostream>
 #include <aws/core/utils/logging/LogMacros.h>
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
+#include <cloudwatch_metrics_common/cloudwatch_options.h>
 
 using namespace Aws::Client;
 
@@ -170,6 +171,174 @@ void ReadTopics(std::vector<std::string> & topics) {
     topics.push_back(kNodeDefaulMetricsTopic);
   }
 }
+
+Aws::AwsError ReadCloudWatchOptions(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options) {
+
+  Aws::DataFlow::UploaderOptions uploader_options;
+  Aws::FileManagement::FileManagerStrategyOptions file_manager_strategy_options;
+
+  ReadUploaderOptions(parameter_reader, uploader_options);
+  ReadFileManagerStrategyOptions(parameter_reader, file_manager_strategy_options);
+
+  cloudwatch_options = {
+    uploader_options,
+    file_manager_strategy_options
+  };
+
+  return Aws::AwsError::AWS_ERR_OK;
+}
+
+Aws::AwsError ReadUploaderOptions(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  Aws::DataFlow::UploaderOptions & uploader_options) {
+
+  ReadUploaderOption(
+    parameter_reader,
+    kNodeParamFileUploadBatchSize,
+    Aws::DataFlow::kDefaultUploaderOptions.file_upload_batch_size,
+    uploader_options.file_upload_batch_size
+  );
+
+  ReadUploaderOption(
+    parameter_reader,
+    kNodeParamFileMaxQueueSize,
+    Aws::DataFlow::kDefaultUploaderOptions.file_max_queue_size,
+    uploader_options.file_max_queue_size
+  );
+
+  ReadUploaderOption(
+    parameter_reader,
+    kNodeParamStreamMaxQueueSize,
+    Aws::DataFlow::kDefaultUploaderOptions.stream_max_queue_size,
+    uploader_options.stream_max_queue_size
+  );
+
+  ReadUploaderOption(
+    parameter_reader,
+    kNodeParamBatchMaxQueueSize,
+    Aws::DataFlow::kDefaultUploaderOptions.batch_max_queue_size,
+    uploader_options.batch_max_queue_size
+  );
+
+  ReadUploaderOption(
+    parameter_reader,
+    kNodeParamBatchTriggerPublishSize,
+    Aws::DataFlow::kDefaultUploaderOptions.batch_trigger_publish_size,
+    uploader_options.batch_trigger_publish_size
+  );
+
+  return Aws::AwsError::AWS_ERR_OK;
+}
+
+Aws::AwsError ReadUploaderOption(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  const std::string &option_key,
+  const size_t &default_value,
+  size_t & option_value) {
+
+  int param_value = 0;
+  Aws::AwsError ret = parameter_reader->ReadParam(ParameterPath(option_key), param_value);
+  switch (ret) {
+    case Aws::AwsError::AWS_ERR_NOT_FOUND:
+      option_value = default_value;
+      AWS_LOGSTREAM_WARN(__func__,
+                         option_key << " parameter not found, setting to default value: " << default_value);
+      break;
+    case Aws::AwsError::AWS_ERR_OK:
+      option_value = (size_t)param_value;
+      AWS_LOGSTREAM_INFO(__func__, option_key << " is set to " << option_value);
+      break;
+    default:
+      AWS_LOGSTREAM_ERROR(__func__,
+        "Error " << ret << " retrieving option " << option_key << ", setting to default value: " << default_value);
+      option_value = default_value;
+      break;
+  }
+  return ret;
+}
+
+Aws::AwsError ReadFileManagerStrategyOptions(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  Aws::FileManagement::FileManagerStrategyOptions & file_manager_strategy_options) {
+
+  ReadFileManagerStrategyOption(parameter_reader,
+    kNodeParamStorageDirectory,
+    Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_directory,
+    file_manager_strategy_options.storage_directory);
+
+  ReadFileManagerStrategyOption(parameter_reader,
+    kNodeParamFilePrefix,
+    Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_prefix,
+    file_manager_strategy_options.file_prefix);
+
+  ReadFileManagerStrategyOption(parameter_reader,
+    kNodeParamFileExtension,
+    Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_extension,
+    file_manager_strategy_options.file_extension);
+
+  ReadFileManagerStrategyOption(parameter_reader,
+    kNodeParamMaximumFileSize,
+    Aws::FileManagement::kDefaultFileManagerStrategyOptions.maximum_file_size_in_kb,
+    file_manager_strategy_options.maximum_file_size_in_kb);
+
+  ReadFileManagerStrategyOption(parameter_reader,
+    kNodeParamStorageLimit,
+    Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_limit_in_kb,
+    file_manager_strategy_options.storage_limit_in_kb);
+
+  return Aws::AwsError::AWS_ERR_OK;
+}
+
+Aws::AwsError ReadFileManagerStrategyOption(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  const std::string & option_key,
+  const std::string & default_value,
+  std::string & option_value) {
+  Aws::AwsError ret = parameter_reader->ReadParam(ParameterPath(option_key), option_value);
+  switch (ret) {
+    case Aws::AwsError::AWS_ERR_NOT_FOUND:
+      option_value = default_value;
+      AWS_LOGSTREAM_WARN(__func__,
+                         option_key << " parameter not found, setting to default value: " << default_value);
+      break;
+    case Aws::AwsError::AWS_ERR_OK:
+      AWS_LOGSTREAM_INFO(__func__, option_key << " is set to: " << option_value);
+      break;
+    default:
+      option_value = default_value;
+      AWS_LOGSTREAM_ERROR(__func__,
+        "Error " << ret << " retrieving option " << option_key << ", setting to default value: " << default_value);
+  }
+  return ret;
+}
+
+Aws::AwsError ReadFileManagerStrategyOption(
+  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
+  const std::string & option_key,
+  const size_t & default_value,
+  size_t & option_value) {
+  int return_value = 0;
+  Aws::AwsError ret = parameter_reader->ReadParam(ParameterPath(option_key), return_value);
+  switch (ret) {
+    case Aws::AwsError::AWS_ERR_NOT_FOUND:
+      option_value = default_value;
+      AWS_LOGSTREAM_WARN(__func__,
+                         option_key << " parameter not found, setting to default value: " << default_value);
+      break;
+    case Aws::AwsError::AWS_ERR_OK:
+      option_value = (size_t)return_value;
+      AWS_LOGSTREAM_INFO(__func__, option_key << " is set to: " << option_value);
+      break;
+    default:
+      option_value = default_value;
+      AWS_LOGSTREAM_ERROR(__func__,
+        "Error " << ret << " retrieving option " << option_key << ", setting to default value: " << default_value);
+  }
+  return ret;
+}
+
 
 
 }  // namespace Utils

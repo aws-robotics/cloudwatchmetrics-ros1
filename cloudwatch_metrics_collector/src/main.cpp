@@ -40,6 +40,7 @@
 #include <aws_common/sdk_utils/parameter_reader.h>
 
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
+#include <cloudwatch_metrics_common/cloudwatch_options.h>
 
 using namespace Aws::CloudWatchMetrics::Utils;
 
@@ -69,18 +70,19 @@ int main(int argc, char * argv[])
   double publish_frequency;
 
   std::string metric_namespace;
-
   Aws::String dimensions_param;
   std::map<std::string, std::string> default_metric_dims;
 
   // Load the storage resolution
   int storage_resolution = kNodeDefaultMetricDatumStorageResolution;
+  Aws::CloudWatchMetrics::CloudWatchOptions cloudwatch_options;
 
   ReadPublishFrequency(parameter_reader, publish_frequency);
   ReadMetricNamespace(parameter_reader, metric_namespace);
   ReadMetricDimensions(parameter_reader, dimensions_param, default_metric_dims);
   ReadStorageResolution(parameter_reader, storage_resolution);
 
+  ReadCloudWatchOptions(parameter_reader, cloudwatch_options);
   //-----------------End read configuration parameters-----------------------
 
   // create the metric collector
@@ -93,15 +95,21 @@ int main(int argc, char * argv[])
           storage_resolution,
           node_handle,
           client_config,
-          sdk_options);
+          sdk_options,
+          cloudwatch_options);
 
   // start the collection process
   metrics_collector.start();
 
-  // a ros timer that triggers log publisher to publish periodically
-  ros::Timer timer =
-    node_handle.createTimer(ros::Duration(publish_frequency),
-                            &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish, &metrics_collector);
+  bool publish_when_size_reached = cloudwatch_options.uploader_options.batch_trigger_publish_size
+    != Aws::DataFlow::kDefaultUploaderOptions.batch_trigger_publish_size;
+
+  // Publish on a timer if we are not publishing on a size limit.
+  if (!publish_when_size_reached) {
+    ros::Timer timer =
+      node_handle.createTimer(ros::Duration(publish_frequency),
+                              &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish, &metrics_collector);
+  }
 
   ros::spin();
 

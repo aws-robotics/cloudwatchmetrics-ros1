@@ -65,6 +65,7 @@ public:
                   ros::NodeHandle node_handle,
                   const Aws::Client::ClientConfiguration & config,
                   const Aws::SDKOptions & sdk_options,
+                  const Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options,
                   std::shared_ptr<MetricServiceFactory> metric_service_factory = std::make_shared<MetricServiceFactory>());
 
   void SubscribeAllTopics();
