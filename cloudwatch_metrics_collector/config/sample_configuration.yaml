@@ -16,7 +16,8 @@ batch_max_queue_size: 1024
 
 # Once this many log items are in the queue a cloudwatch metrics publish will be triggered.
 # If this is not set the logs will be published on a constant timer regardless of the queue size.
-batch_trigger_publish_size: 64
+# This must be smaller than batch_max_queue_size
+#batch_trigger_publish_size: 64
 
 # How many batches of metrics to send to CloudWatch in each upload
 file_upload_batch_size: 50
