@@ -46,7 +46,7 @@ void ReadPublishFrequency(
   switch (ret) {
     case Aws::AwsError::AWS_ERR_NOT_FOUND:
       publish_frequency = kNodePublishFrequencyDefaultValue;
-      AWS_LOGSTREAM_WARN(__func__,
+      AWS_LOGSTREAM_INFO(__func__,
                          "Publish frequency configuration not found, setting to default value: "
                                  << kNodePublishFrequencyDefaultValue);
       break;
@@ -78,7 +78,7 @@ void ReadMetricNamespace(
   if (Aws::AWS_ERR_OK == read_namespace_status) {
     AWS_LOGSTREAM_INFO(__func__, "Namespace: " << metric_namespace);
   } else {
-    AWS_LOGSTREAM_WARN(
+    AWS_LOGSTREAM_INFO(
             __func__,
             "No namespace configuration found. Falling back to default namespace: " << kNodeDefaultMetricNamespace);
     metric_namespace = kNodeDefaultMetricNamespace;
@@ -152,7 +152,7 @@ void ReadStorageResolution(
       AWS_LOGSTREAM_INFO(__func__, "Storage Resolution: " << storage_resolution);
     }
   } else {
-    AWS_LOGSTREAM_WARN(
+    AWS_LOGSTREAM_INFO(
             __func__,
             "No Storage Resolution configuration found. Falling back to default Storage Resolution: "
                     << storage_resolution);
@@ -232,27 +232,32 @@ void ReadFileManagerStrategyOptions(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   Aws::FileManagement::FileManagerStrategyOptions & file_manager_strategy_options) {
 
-  ReadOption(parameter_reader,
+  ReadOption(
+    parameter_reader,
     kNodeParamStorageDirectory,
     Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_directory,
     file_manager_strategy_options.storage_directory);
 
-  ReadOption(parameter_reader,
+  ReadOption(
+    parameter_reader,
     kNodeParamFilePrefix,
     Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_prefix,
     file_manager_strategy_options.file_prefix);
 
-  ReadOption(parameter_reader,
+  ReadOption(
+    parameter_reader,
     kNodeParamFileExtension,
     Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_extension,
     file_manager_strategy_options.file_extension);
 
-  ReadOption(parameter_reader,
+  ReadOption(
+    parameter_reader,
     kNodeParamMaximumFileSize,
     Aws::FileManagement::kDefaultFileManagerStrategyOptions.maximum_file_size_in_kb,
     file_manager_strategy_options.maximum_file_size_in_kb);
 
-  ReadOption(parameter_reader,
+  ReadOption(
+    parameter_reader,
     kNodeParamStorageLimit,
     Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_limit_in_kb,
     file_manager_strategy_options.storage_limit_in_kb);
