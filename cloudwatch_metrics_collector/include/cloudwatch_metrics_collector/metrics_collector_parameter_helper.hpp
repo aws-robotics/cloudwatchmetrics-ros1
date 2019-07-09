@@ -111,7 +111,7 @@ void ReadTopics(std::vector<std::string> & topics);
  * @return an error code that indicates whether the parameter was read successfully or not,
  * as returned by \p parameter_reader
  */
-Aws::AwsError ReadCloudWatchOptions(
+void ReadCloudWatchOptions(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options);
 
@@ -123,25 +123,9 @@ Aws::AwsError ReadCloudWatchOptions(
  * @return an error code that indicates whether the parameter was read successfully or not,
  * as returned by \p parameter_reader
  */
-Aws::AwsError ReadUploaderOptions(
+void ReadUploaderOptions(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   Aws::DataFlow::UploaderOptions & uploader_options);
-
-/**
- * Fetch a single size_t option related to cloudwatch log uploading
- *
- * @param parameter_reader to retrieve the parameters from
- * @param option_key the parameter key to read
- * @param default_value a default value if the parameter doesn't exist or is unreadble
- * @param option_value the value for this option
- * @return an error code that indicates whether the parameter was read successfully or not,
- * as returned by \p parameter_reader
- */
-Aws::AwsError ReadUploaderOption(
-  std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
-  const std::string & option_key,
-  const size_t & default_value,
-  size_t & option_value);
 
 /**
  * Fetch the options related to cloudwatch offline file management
@@ -151,12 +135,12 @@ Aws::AwsError ReadUploaderOption(
  * @return an error code that indicates whether the parameter was read successfully or not,
  * as returned by \p parameter_reader
  */
-Aws::AwsError ReadFileManagerStrategyOptions(
+void ReadFileManagerStrategyOptions(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   Aws::FileManagement::FileManagerStrategyOptions & file_manager_strategy_options);
 
 /**
- * Fetch a single string option related to cloudwatch offline file management
+ * Fetch a single string option
  *
  * @param parameter_reader to retrieve the parameters from
  * @param option_key the parameter key to read
@@ -165,14 +149,14 @@ Aws::AwsError ReadFileManagerStrategyOptions(
  * @return an error code that indicates whether the parameter was read successfully or not,
  * as returned by \p parameter_reader
  */
-Aws::AwsError ReadFileManagerStrategyOption(
+void ReadOption(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   const std::string & option_key,
   const std::string & default_value,
   std::string & option_value);
 
 /**
- * Fetch a single size_t option related to cloudwatch offline file management
+ * Fetch a single size_t option
  *
  * @param parameter_reader to retrieve the parameters from
  * @param option_key the parameter key to read
@@ -181,7 +165,7 @@ Aws::AwsError ReadFileManagerStrategyOption(
  * @return an error code that indicates whether the parameter was read successfully or not,
  * as returned by \p parameter_reader
  */
-Aws::AwsError ReadFileManagerStrategyOption(
+void ReadOption(
   std::shared_ptr<Aws::Client::ParameterReaderInterface> parameter_reader,
   const std::string & option_key,
   const size_t & default_value,

@@ -8,39 +8,6 @@ aws_metrics_namespace: "ros_metrics_collector"
 # topics in the list.
 #aws_monitored_metric_topics: ["metrics"]
 
-### Options related to uploading to CloudWatch ###
-
-# Maximum number of items to add to the upload queue.
-# If this limit is reached the metrics will start to be written to disk.
-batch_max_queue_size: 1024
-
-# Once this many log items are in the queue a cloudwatch metrics publish will be triggered.
-# If this is not set the logs will be published on a constant timer regardless of the queue size.
-# This must be smaller than batch_max_queue_size
-#batch_trigger_publish_size: 64
-
-# How many batches of metrics to send to CloudWatch in each upload
-file_upload_batch_size: 50
-
-# Maximum number of files in the upload queue when reading metrics that were saved due to being offline
-file_max_queue_size: 2
-
-# Maximum number of files in the upload queue when streaming live logs from the node to CloudWatch Metrics
-stream_max_queue_size: 20
-
-### Options related to offline file management ###
-# When this node goes offline or cannot talk to CloudWatch it will store all metrics in text files on disk
-# Then when it's back online it will upload them to CloudWatch. These are settings related to this feature.
-
-# This prefix will be added to all offline metric storage files
-file_prefix: "cwmetric"
-
-# This file extension will be used for all offline metric storage files
-file_extension: ".log"
-
-# The maximum size of each file in offline storage in KB
-maximum_file_size: 1024
-
 # The absolute path to a folder that all offline metric files will be stored in
 storage_directory: "~/.ros/cwmetrics/"
 
