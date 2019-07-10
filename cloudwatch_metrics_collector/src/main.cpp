@@ -104,9 +104,10 @@ int main(int argc, char * argv[])
   bool publish_when_size_reached = cloudwatch_options.uploader_options.batch_trigger_publish_size
     != Aws::DataFlow::kDefaultUploaderOptions.batch_trigger_publish_size;
 
+  ros::Timer timer;
   // Publish on a timer if we are not publishing on a size limit.
   if (!publish_when_size_reached) {
-    ros::Timer timer =
+    timer =
       node_handle.createTimer(ros::Duration(publish_frequency),
                               &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish, &metrics_collector);
   }
