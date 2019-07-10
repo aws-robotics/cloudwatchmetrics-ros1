@@ -35,16 +35,16 @@ const std::string kNodeName = "cloudwatch_metrics_collector";
 const char kNodeParamPublishFrequencyKey[] = "publish_frequency";
 
 /** Configuration params for Aws::DataFlow::UploaderOptions **/
-constexpr char kNodeParamFileUploadBatchSize[] = "file_upload_batch_size";
-constexpr char kNodeParamFileMaxQueueSize[] = "file_max_queue_size";
 constexpr char kNodeParamBatchMaxQueueSize[] = "batch_max_queue_size";
 constexpr char kNodeParamBatchTriggerPublishSize[] = "batch_trigger_publish_size";
+constexpr char kNodeParamFileMaxQueueSize[] = "file_max_queue_size";
+constexpr char kNodeParamFileUploadBatchSize[] = "file_upload_batch_size";
 
 /** Configuration params for Aws::FileManagement::FileManagerStrategyOptions **/
-constexpr char kNodeParamFilePrefix[] = "file_prefix";
-constexpr char kNodeParamStorageDirectory[] = "storage_directory";
 constexpr char kNodeParamFileExtension[] = "file_extension";
+constexpr char kNodeParamFilePrefix[] = "file_prefix";
 constexpr char kNodeParamMaximumFileSize[] = "maximum_file_size";
+constexpr char kNodeParamStorageDirectory[] = "storage_directory";
 constexpr char kNodeParamStorageLimit[] = "storage_limit";
 
 constexpr int kNodeSubQueueSize = 100;
