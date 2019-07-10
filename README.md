@@ -123,7 +123,6 @@ Most users won't need to touch these parameters, they are useful if you want fin
 | batch_max_queue_size | The maximum number metrics items to add to the CloudWatch upload queue before they start to be written to disk | *int* | 1024 |
 | batch_trigger_publish_size | Only publish metrics to CloudWatch when there are this many items in the queue. When this is set the publishing of metrics on a constant timer is disabled. This must be smaller than batch_max_queue_size | *int* | 64 |
 | file_upload_batch_size | When streaming metrics from disk to CloudWatch it will pull this many metric items into each batch | *int* | 50 |
-| stream_max_queue_size | When streaming metrics directly to CloudWatch it will send this many metric items in each batch | *int* | 20 |
 | file_prefix | A prefix to add to each offline storage file so they're easier to identify later | *string* | cwmetric |
 | file_extension | The extension for all offline storage files | *string* | .log |
 | maximum_file_size | The maximum size each offline storage file in KB | *int* | 1024 |

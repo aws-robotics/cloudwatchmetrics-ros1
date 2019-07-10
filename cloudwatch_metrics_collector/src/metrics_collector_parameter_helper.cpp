@@ -208,13 +208,6 @@ void ReadUploaderOptions(
 
   ReadOption(
     parameter_reader,
-    kNodeParamStreamMaxQueueSize,
-    Aws::DataFlow::kDefaultUploaderOptions.stream_max_queue_size,
-    uploader_options.stream_max_queue_size
-  );
-
-  ReadOption(
-    parameter_reader,
     kNodeParamBatchMaxQueueSize,
     Aws::DataFlow::kDefaultUploaderOptions.batch_max_queue_size,
     uploader_options.batch_max_queue_size
