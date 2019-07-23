@@ -19,6 +19,8 @@
 #include <ros/ros.h>
 #include <ros_monitoring_msgs/MetricList.h>
 #include <ros_monitoring_msgs/MetricData.h>
+#include <std_srvs/Trigger.h>
+#include <std_srvs/Empty.h>
 
 #include <cloudwatch_metrics_common/metric_service.hpp>
 #include <cloudwatch_metrics_common/metric_service_factory.hpp>
@@ -41,8 +43,9 @@ public:
    * Accept input metric message to be batched for publishing.
    *
    * @param metric_list_msg
+   * @return the number of metrics successfully batched
    */
-  void RecordMetrics(const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg);
+  int RecordMetrics(const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg);
 
   /**
    * Force all batched data to be published to CloudWatch.
@@ -72,6 +75,15 @@ public:
 
   bool start() override;
   bool shutdown() override;
+
+  /**
+   * Return a Trigger response detailing the MetricService online status.
+   *
+   * @param request input request
+   * @param response output response
+   * @return true if the request was handled successfully, false otherwise
+   */
+  bool checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
 protected:
 

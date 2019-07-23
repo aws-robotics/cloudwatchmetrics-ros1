@@ -35,7 +35,8 @@
 #include <string>
 #include <vector>
 #include <map>
-
+#include <std_srvs/Trigger.h>
+#include <std_srvs/Empty.h>
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
 
 using namespace Aws::Client;
@@ -78,9 +79,10 @@ void MetricsCollector::SubscribeAllTopics()
   }
 }
 
-void MetricsCollector::RecordMetrics(
+int MetricsCollector::RecordMetrics(
   const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg)
 {
+  int batched_count = 0;
   AWS_LOGSTREAM_DEBUG(__func__, "Received " << metric_list_msg->metrics.size() << " metrics");
 
   for (auto metric_msg = metric_list_msg->metrics.begin();
@@ -110,7 +112,10 @@ void MetricsCollector::RecordMetrics(
     if (!batched) {
       AWS_LOGSTREAM_ERROR(__func__, "Failed to record metric");
     }
+
+    batched_count++;
   }
+  return batched_count;
 }
 
 int64_t MetricsCollector::GetMetricDataEpochMillis(const ros_monitoring_msgs::MetricData & metric_msg)
@@ -125,22 +130,38 @@ void MetricsCollector::TriggerPublish(const ros::TimerEvent &)
 }
 
 bool MetricsCollector::start() {
-
+  bool is_started = true;
   this->SubscribeAllTopics();
 
   if (this->metric_service_) {
-    return this->metric_service_->start();
+    is_started &= this->metric_service_->start();
   }
-
-  return false;
+  is_started &= Service::start();
+  return is_started;
 }
 
 bool MetricsCollector::shutdown() {
-
+  bool is_shutdown = Service::shutdown();
   if (this->metric_service_) {
-    return this->metric_service_->shutdown();
+    is_shutdown &= this->metric_service_->shutdown();
   }
-  return false;
+  return is_shutdown;
+}
+
+bool MetricsCollector::checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
+
+  AWS_LOGSTREAM_DEBUG(__func__, "received request " << request);
+
+  if (!this->metric_service_) {
+    response.success = false;
+    response.message = "The MetricsCollector is not initialized";
+    return true;
+  }
+
+  response.success = this->metric_service_->isConnected();
+  response.message = response.success ? "The MetricsCollector is connected" : "The MetricsCollector is not connected";
+
+  return true;
 }
 
 }  // namespace Utils

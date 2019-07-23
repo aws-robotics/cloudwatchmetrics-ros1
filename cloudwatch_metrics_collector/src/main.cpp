@@ -86,7 +86,7 @@ int main(int argc, char * argv[])
   //-----------------End read configuration parameters-----------------------
 
   // create the metric collector
-  Aws::CloudWatchMetrics::MetricsCollector metrics_collector;
+  Aws::CloudWatchMetrics::Utils::MetricsCollector metrics_collector;
 
   // initialize with options read from the config file
   metrics_collector.Initialize(
@@ -97,6 +97,10 @@ int main(int argc, char * argv[])
           client_config,
           sdk_options,
           cloudwatch_options);
+
+  ros::ServiceServer service = node_handle.advertiseService(kNodeName,
+                                                            &Aws::CloudWatchMetrics::Utils::MetricsCollector::checkIfOnline,
+                                                            &metrics_collector);
 
   // start the collection process
   metrics_collector.start();
@@ -109,7 +113,8 @@ int main(int argc, char * argv[])
   if (!publish_when_size_reached) {
     timer =
       node_handle.createTimer(ros::Duration(publish_frequency),
-                              &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish, &metrics_collector);
+                              &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish,
+                              &metrics_collector);
   }
 
   ros::spin();
