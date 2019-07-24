@@ -2,8 +2,8 @@
 Changelog for package cloudwatch_metrics_collector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.0 (2019-07-24)
+------------------
 * increment version for offline metrics feature (`#32 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/32>`_)
   Signed-off-by: Miaofei <miaofei@amazon.com>
 * Fixing std_msgs, std_srvs dependency resolution (`#30 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/30>`_)
