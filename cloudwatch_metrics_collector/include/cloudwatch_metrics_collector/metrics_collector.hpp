@@ -19,50 +19,73 @@
 #include <ros/ros.h>
 #include <ros_monitoring_msgs/MetricList.h>
 #include <ros_monitoring_msgs/MetricData.h>
+#include <std_srvs/Trigger.h>
+#include <std_srvs/Empty.h>
 
-#include <cloudwatch_metrics_common/metric_manager.hpp>
+#include <cloudwatch_metrics_common/metric_service.hpp>
+#include <cloudwatch_metrics_common/metric_service_factory.hpp>
+
+#include <string>
+#include <map>
 
 namespace Aws {
-namespace CloudWatch {
-namespace Metrics {
+namespace CloudWatchMetrics {
+namespace Utils {
 
-class MetricsCollector
+class MetricsCollector : public Service
 {
 public:
-  static const std::string kNodeParamMonitorTopicsListKey;
-  static const std::string kNodeParamMetricNamespaceKey;
-  static const std::string kNodeParamDefaultMetricDimensionsKey;
-  static const std::string kNodeName;
-  static const int kNodeSubQueueSize;
-  static const int kNodeMetricManagerServiceTimeSec;
-  static const std::string kNodeDefaultMetricNamespace;
-  static const std::string kNodeDefaulMetricsTopic;
-  static const int kNodeDefaultMetricDatumStorageResolution;
-  static const std::string kNodeParamMetricDatumStorageResolutionKey;
 
-  explicit MetricsCollector(std::shared_ptr<MetricManager> metric_manager,
-                            std::map<std::string, std::string> && default_dimensions);
-
-  void ReceiveMetricCallback(const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg);
-
-  void ServiceMetricManagerCallback(const ros::TimerEvent &);
+  MetricsCollector() = default;
+  ~MetricsCollector() = default;
 
   /**
-   *  Subscribes to all the monitoring topics from the parameter service and saves the references in
-   * the provided vector
+   * Accept input metric message to be batched for publishing.
+   *
+   * @param metric_list_msg
+   * @return the number of metrics successfully batched
    */
-  Aws::AwsError SubscribeAllTopics(ros::NodeHandle & nh);
+  int RecordMetrics(const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg);
 
   /**
-   * Parses a default list of metric dimensions from the parameters. The dimensions will be in the
-   * format:
-   *      "<dimension1>:<value1>;<dimension2>:<value2>;<dimension3>:<value3>"
+   * Force all batched data to be published to CloudWatch.
    */
-  Aws::AwsError ParseDefaultDimensions();
+  void TriggerPublish(const ros::TimerEvent &);
 
-  Aws::AwsError Initialize(ros::NodeHandle & nh);
+  /**
+   * Initialize the MetricsCollector with parameters read from the config file.
+   *
+   * @param metric_namespace
+   * @param default_dimensions
+   * @param storage_resolution
+   * @param config
+   * @param sdk_options
+   * @param metric_service_factory
+   */
+  void Initialize(std::string metric_namespace,
+                  std::map<std::string, std::string> & default_dimensions,
+                  int storage_resolution,
+                  ros::NodeHandle node_handle,
+                  const Aws::Client::ClientConfiguration & config,
+                  const Aws::SDKOptions & sdk_options,
+                  const Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options,
+                  std::shared_ptr<MetricServiceFactory> metric_service_factory = std::make_shared<MetricServiceFactory>());
 
-  static MetricsCollector Build(Aws::AwsError & status);
+  void SubscribeAllTopics();
+
+  bool start() override;
+  bool shutdown() override;
+
+  /**
+   * Return a Trigger response detailing the MetricService online status.
+   *
+   * @param request input request
+   * @param response output response
+   * @return true if the request was handled successfully, false otherwise
+   */
+  bool checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+
+protected:
 
   /**
    * Gets the timestamp for the input metric message as milliseconds since epoch
@@ -70,14 +93,16 @@ public:
   static int64_t GetMetricDataEpochMillis(const ros_monitoring_msgs::MetricData & metric_msg);
 
 private:
-  std::shared_ptr<MetricManager> metric_manager_ = nullptr;
-  std::unique_ptr<ros::Timer> timer_ = nullptr;
-  std::vector<ros::Subscriber> subscriptions_;
-  std::map<std::string, std::string> default_dimensions_;
 
-  static const std::set<int> kNodeParamMetricDatumStorageResolutionValidValues;
+  std::string metric_namespace_;
+  std::map<std::string, std::string> default_dimensions_;
+  std::atomic<int> storage_resolution_;
+  std::shared_ptr<MetricService> metric_service_;
+  std::vector<ros::Subscriber> subscriptions_;
+  ros::NodeHandle node_handle_;
+  std::vector<std::string> topics_;
 };
 
-}  // namespace Metrics
-}  // namespace CloudWatch
+}  // namespace Utils
+}  // namespace CloudWatchMetrics
 }  // namespace Aws

@@ -8,6 +8,12 @@ aws_metrics_namespace: "ros_metrics_collector"
 # topics in the list.
 #aws_monitored_metric_topics: ["metrics"]
 
+# The absolute path to a folder that all offline metric files will be stored in
+storage_directory: "~/.ros/cwmetrics/"
+
+# The maximum size of all files in offline storage in KB
+storage_limit: 1048576
+
 # This is the AWS Client Configuration used by the AWS service client in the Node. If given the node will load the
 # provided configuration when initializing the client.
 aws_client_configuration:
@@ -38,7 +44,8 @@ aws_client_configuration:
     # this value if you need to transfer large files, such as in Amazon S3 or Amazon CloudFront.
     request_timeout_ms: 2000
     connect_timeout_ms: 2000
-    max_retries: 10
+    max_retries: 1
+    no_retry_strategy: true
 
     # The maximum number of allowed connections to a single server for your HTTP communications. The default value is 25.
     # You can set this value as high as you can support the bandwidth. We recommend a value around 25.

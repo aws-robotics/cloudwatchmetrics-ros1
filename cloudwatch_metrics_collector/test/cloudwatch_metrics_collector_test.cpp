@@ -1,26 +1,29 @@
 /*
- * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License").
- * You may not use this file except in compliance with the License.
- * A copy of the License is located at
- *
- *  http://aws.amazon.com/apache2.0
- *
- * or in the "license" file accompanying this file. This file is distributed
- * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
-#include <aws/core/Aws.h>
-#include <aws/core/utils/logging/LogMacros.h>
+* Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License").
+* You may not use this file except in compliance with the License.
+* A copy of the License is located at
+*
+*  http://aws.amazon.com/apache2.0
+*
+* or in the "license" file accompanying this file. This file is distributed
+* on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+* express or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <ros/console.h>
 #include <ros/ros.h>
 
+/*
+#include <aws/core/Aws.h>
+#include <aws/core/utils/logging/LogMacros.h>
+
 #include <cloudwatch_metrics_collector/metrics_collector.hpp>
-#include <cloudwatch_metrics_common/metric_manager.hpp>
+#include <cloudwatch_metrics_common/metric_service.hpp>
 #include <ros_monitoring_msgs/MetricData.h>
 
 using namespace Aws::CloudWatch::Metrics;
@@ -28,7 +31,7 @@ using namespace Aws::CloudWatch::Metrics;
 class MetricManagerMock : public MetricManager
 {
 public:
-  MetricManagerMock() : MetricManager(nullptr, 0){};
+  MetricManagerMock() : MetricManager(nullptr, 0) {};
 
   MOCK_METHOD0(Service, Aws::AwsError());
   MOCK_METHOD5(RecordMetric, Aws::AwsError(const std::string &, double, const std::string &,
@@ -50,7 +53,7 @@ protected:
   {
     node_handle = std::make_shared<ros::NodeHandle>();
     metrics_pub = std::make_shared<ros::Publisher>(
-      node_handle->advertise<ros_monitoring_msgs::MetricList>(kMetricsTopic.c_str(), 1));
+                    node_handle->advertise<ros_monitoring_msgs::MetricList>(kMetricsTopic.c_str(), 1));
   }
 
   void TearDown() { ros::param::del(MetricsCollector::kNodeParamMonitorTopicsListKey); }
@@ -64,7 +67,7 @@ protected:
       metric_list_msg.metrics.clear();
       metric_list_msg.metrics.push_back(metric_data_proto);
       AWS_LOGSTREAM_DEBUG(__func__, "Publishing " << metric_list_msg.metrics.size()
-                                                  << " metrics to topic " << kMetricsTopic.c_str());
+                          << " metrics to topic " << kMetricsTopic.c_str());
       metrics_pub->publish(metric_list_msg);
       ros::spinOnce();
       std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -81,7 +84,7 @@ protected:
 };
 
 struct GetMetricDataEpochMillisTestDatum {
-  ros::Time input_time; 
+  ros::Time input_time;
   int64_t expected_timestamp;
 };
 class GetMetricDataEpochMillisFixture : public ::testing::TestWithParam<GetMetricDataEpochMillisTestDatum> {};
@@ -92,16 +95,16 @@ TEST_P(GetMetricDataEpochMillisFixture, getMetricDataEpochMillisTestOk)
   EXPECT_EQ(GetParam().expected_timestamp, MetricsCollector::GetMetricDataEpochMillis(metric_msg));
 }
 const GetMetricDataEpochMillisTestDatum getMetricDataEpochMillisTestData [] = {
-  GetMetricDataEpochMillisTestDatum{ros::Time(0,0), 0},
-  GetMetricDataEpochMillisTestDatum{ros::Time(10,0), 10 * 1000},
-  GetMetricDataEpochMillisTestDatum{ros::Time(0,1), 0},
-  GetMetricDataEpochMillisTestDatum{ros::Time(0,999999), 0},
-  GetMetricDataEpochMillisTestDatum{ros::Time(1,999999), 1000},
-  GetMetricDataEpochMillisTestDatum{ros::Time(0,1000000), 1},
-  GetMetricDataEpochMillisTestDatum{ros::Time(1,1000000), 1001}
+  GetMetricDataEpochMillisTestDatum{ros::Time(0, 0), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(10, 0), 10 * 1000},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0, 1), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0, 999999), 0},
+  GetMetricDataEpochMillisTestDatum{ros::Time(1, 999999), 1000},
+  GetMetricDataEpochMillisTestDatum{ros::Time(0, 1000000), 1},
+  GetMetricDataEpochMillisTestDatum{ros::Time(1, 1000000), 1001}
 };
-INSTANTIATE_TEST_CASE_P(getMetricDataEpochMillisTest, GetMetricDataEpochMillisFixture, 
-  ::testing::ValuesIn(getMetricDataEpochMillisTestData));
+INSTANTIATE_TEST_CASE_P(getMetricDataEpochMillisTest, GetMetricDataEpochMillisFixture,
+                        ::testing::ValuesIn(getMetricDataEpochMillisTestData));
 
 TEST_F(MetricsCollectorFixture, timerCallsMetricManagerService)
 {
@@ -109,12 +112,12 @@ TEST_F(MetricsCollectorFixture, timerCallsMetricManagerService)
 
   std::shared_ptr<MetricManagerMock> metric_manager = std::make_shared<MetricManagerMock>();
   EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AtLeast(num_msgs))
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AtLeast(num_msgs))
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   EXPECT_CALL(*metric_manager,
               RecordMetric(::testing::_, ::testing::_, ::testing::_, ::testing::_, ::testing::_))
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AnyNumber())
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
 
   MetricsCollector metrics_collector =
     MetricsCollector(metric_manager, std::move(default_metric_dims));
@@ -134,22 +137,22 @@ TEST_F(MetricsCollectorFixture, metricsRecordedNoDimension)
 
   std::shared_ptr<MetricManagerMock> metric_manager = std::make_shared<MetricManagerMock>();
   EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AnyNumber())
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   {
     ::testing::Sequence rm_seq;
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(0),
                              ::testing::StrEq(kMetricUnit1), ::testing::_, ::testing::IsEmpty()))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(1),
                              ::testing::StrEq(kMetricUnit1), ::testing::_, ::testing::IsEmpty()))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(2),
                              ::testing::StrEq(kMetricUnit1), ::testing::_, ::testing::IsEmpty()))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   }
 
   MetricsCollector metrics_collector =
@@ -171,8 +174,8 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDimension)
   std::map<std::string, std::string> expected_dim;
   expected_dim[metric_dimension_name] = metric_dimension_value;
   EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AnyNumber())
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
 
   {
     ::testing::Sequence rm_seq;
@@ -180,17 +183,17 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDimension)
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(0),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(1),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(2),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   }
 
   MetricsCollector metrics_collector =
@@ -217,8 +220,8 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDefaultDimensions)
   std::map<std::string, std::string> expected_dim;
   expected_dim[metric_dimension_name] = metric_dimension_value;
   EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AnyNumber())
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
 
   {
     ::testing::Sequence rm_seq;
@@ -226,17 +229,17 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDefaultDimensions)
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(0),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(1),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
     EXPECT_CALL(*metric_manager,
                 RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(2),
                              ::testing::StrEq(kMetricUnit1), ::testing::_,
                              ::testing::ContainerEq(expected_dim)))
-      .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   }
 
   default_metric_dims.emplace(metric_dimension_name, metric_dimension_value);
@@ -260,16 +263,16 @@ TEST_F(MetricsCollectorFixture, customTopicsListened)
 
   std::shared_ptr<MetricManagerMock> metric_manager = std::make_shared<MetricManagerMock>();
   EXPECT_CALL(*metric_manager, Service())
-    .Times(::testing::AnyNumber())
-    .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(::testing::AnyNumber())
+  .WillRepeatedly(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   EXPECT_CALL(*metric_manager, RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(0),
                                             ::testing::_, ::testing::_, ::testing::_))
-    .Times(1)
-    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(1)
+  .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
   EXPECT_CALL(*metric_manager, RecordMetric(::testing::StrEq(kMetricName1), ::testing::DoubleEq(1),
                                             ::testing::_, ::testing::_, ::testing::_))
-    .Times(1)
-    .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
+  .Times(1)
+  .WillOnce(::testing::Return(Aws::AwsError::AWS_ERR_OK));
 
   MetricsCollector metrics_collector =
     MetricsCollector(metric_manager, std::move(default_metric_dims));
@@ -296,6 +299,7 @@ TEST_F(MetricsCollectorFixture, customTopicsListened)
   std::this_thread::sleep_for(std::chrono::seconds(1));
   ros::spinOnce();
 }
+*/
 
 int main(int argc, char ** argv)
 {

@@ -105,40 +105,29 @@ An example configuration file named `sample_configuration.yaml` is provided that
 
 All parameters to the Node are provided via the parameter server when the node is started. When loading configuration the Node will start looking for each setting inside of its private namespace and then search up the namespace heirarchy to the global namespace for the parameters.
 
-| Parameter Name | Description | Type |
-| ------------- | -----------------------------------------------------------| ------------- |
-| aws_metrics_namespace | (optional) If provided it will set the namespace for all metrics provided by this node to the provided value. If the node is running on AWS RoboMaker then the provided launch file will ignore this parameter in favor of the namespace specified by the AWS RoboMaker ecosystem | *string* |
-| aws_monitored_metric_topics | (optional) An optional list of topics to listen to. If not provided or is empty the node will just listen on the global "metrics" topic. If this list is not empty then the node will not subscribe to the "metrics" topic and will only subscribe to the topics in the list. | *array of strings* |
-| aws_client_configuration | (optional) If given the node will load the provided configuration when initializing the client. If a specific configuration setting is not included in the map then it will search up the namespace hierarchy for an 'aws_client_configuration' map that contains the field. In this way, a global configuration can be provided for all AWS nodes with only specific values overridden for a specific Node instance if needed | *map* |
-| storage_resolution | (optional) The storage resolution level for presenting metrics in CloudWatch. For more information, see [high-resolution-metrics]. | *int* |
+| Parameter Name | Description | Type | Default |
+| ------------- | -----------------------------------------------------------| ------------- | ------------ |
+| aws_metrics_namespace | If provided it will set the namespace for all metrics provided by this node to the provided value. If the node is running on AWS RoboMaker then the provided launch file will ignore this parameter in favor of the namespace specified by the AWS RoboMaker ecosystem | *string* | ROS |
+| aws_monitored_metric_topics | An optional list of topics to listen to. If not provided or is empty the node will just listen on the global "metrics" topic. If this list is not empty then the node will not subscribe to the "metrics" topic and will only subscribe to the topics in the list. | *array of strings* | metrics |
+| storage_directory | The location where all offline metrics will be stored | *string* | ~/.ros/cwmetrics/ |
+| storage_limit | The maximum size of all offline storage files in KB. Once this limit is reached offline logs will start to be deleted oldest first. | *int* | 1048576 |
+| aws_client_configuration | If given the node will load the provided configuration when initializing the client. If a specific configuration setting is not included in the map then it will search up the namespace hierarchy for an 'aws_client_configuration' map that contains the field. In this way, a global configuration can be provided for all AWS nodes with only specific values overridden for a specific Node instance if needed | *map* | |
+| storage_resolution | The storage resolution level for presenting metrics in CloudWatch. For more information, see [high-resolution-metrics](http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html). | *int* | 60 |
 
 
-## Performance and Benchmark Results
-We evaluated the performance of this node by runnning the followning scenario on a Raspberry Pi 3 Model B:
-- Launch a baseline graph containing the talker and listener nodes from the [roscpp_tutorials package](https://wiki.ros.org/roscpp_tutorials), plus two additional nodes that collect CPU and memory usage statistics. Allow the nodes to run for 60 seconds. 
-- Launch the CloudWatch Metrics node using the launch file `sample_application.launch` as described above. At the same time, send messages to the to the `/metrics` topic by running the following script in the background: 
+### Advanced Configuration Parameters
+Most users won't need to touch these parameters, they are useful if you want fine grained control over how your metrics are stored offline and uploaded to CloudWatch. 
 
-```bash
-function metric { 
-  echo "{header: auto, metric_name: 'ExampleMetric', unit: 'sec', value: "${i}", time_stamp: now, dimensions: []}"; 
-}
-
-for i in {1..10}
-do 
-  rostopic pub -1 /metrics ros_monitoring_msgs/MetricList "[$(metric $i)]"
-done 
-```
-
-- Allow the nodes to run for 180 seconds. 
-- Terminate the CloudWatch Metrics node, and allow the remaining nodes to run for 60 seconds. 
-
-The graph below shows the CPU usage during that scenario. We can see how the 1 minute average CPU usage increases when we launch the `cloudwatch_metrics_collector` node around second 60, and the node starts processing messagess, with a peak of 18.5% showing an increase of 15.25% with respect to the initial usage of 3.25%. After we stop sending messages to the `cloudwatch_metrics_collector` node around second 120, the 1 minute average CPU usage decreases to around 12.5, and then goes down to around the initial value as the node finishes sending the metrics to Amazon CloudWatch. The CPU usage goes back to around the original value when we stop the node at the end of the scenario. 
-
-![cpu](wiki/images/cpu.svg)
-
-The graph below shows the memory usage during that scenario. We start with a memory usage of 368 MB that increases to 417 MB (+13.3%) when the `cloudwatch_metrics_collector` node starts running, and decreases to 394 MB (+7% wrt. initial value) when the node is not processing messages. The memory usage goes back to 368 MB after stopping the node. 
-
-![memory](wiki/images/memory.svg)
+| Parameter Name | Description | Type | Default |
+| ------------- | -----------------------------------------------------------| ------------- | ------------ |
+| batch_max_queue_size | The maximum number metrics items to add to the CloudWatch upload queue before they start to be written to disk | *int* | 1024 |
+| batch_trigger_publish_size | Only publish metrics to CloudWatch when there are this many items in the queue. When this is set the publishing of metrics on a constant timer is disabled. This must be smaller than batch_max_queue_size | *int* | 64 |
+| file_max_queue_size | The max number of batches in the queue, each of size file_upload_batch_size, when reading and uploading from offline storage files | *int* | 5 |
+| file_upload_batch_size | The size of each batch of metrics in the queue, when reading and uploading from offline storage files | *int* | 50 |
+| file_prefix | A prefix to add to each offline storage file so they're easier to identify later | *string* | cwmetric |
+| file_extension | The extension for all offline storage files | *string* | .log |
+| maximum_file_size | The maximum size each offline storage file in KB | *int* | 1024 |
+| stream_max_queue_size | The maximum number of batches in the queue to stream to CloudWatch. If this queue is full subsequent batches of metrics will be written to disk. | *int* | 3 |
 
 
 ## Node
