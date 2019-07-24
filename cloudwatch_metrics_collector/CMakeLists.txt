@@ -50,7 +50,7 @@ catkin_package()
 include_directories(${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ executable
-add_library(${PROJECT_NAME}_lib STATIC src/main.cpp src/metrics_collector.cpp src/metrics_collector_parameter_helper.cpp)
+add_library(${PROJECT_NAME}_lib SHARED src/metrics_collector.cpp src/metrics_collector_parameter_helper.cpp)
 
 target_include_directories(${PROJECT_NAME}_lib PUBLIC include ${catkin_INCLUDE_DIRS} ${dataflow_lite_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES} ${dataflow_lite_common_LIBRARIES})
@@ -119,7 +119,7 @@ if(CATKIN_ENABLE_TESTING)
       include
       ${catkin_INCLUDE_DIRS}
       ${cloudwatch_metrics_collector_INCLUDE_DIRS}
-    )   
+    )
     target_link_libraries(${CW_METRICS_COLLECTOR_TEST}
       ${PROJECT_NAME}_lib
       ${catkin_LIBRARIES}
