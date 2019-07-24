@@ -35,7 +35,8 @@ find_package(catkin REQUIRED COMPONENTS
         aws_common
         aws_ros1_common
         rosgraph_msgs
-        ros_monitoring_msgs)
+        ros_monitoring_msgs
+        std_srvs)
 
 ###################################
 ## catkin specific configuration ##
