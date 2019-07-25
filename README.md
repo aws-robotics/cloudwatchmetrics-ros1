@@ -83,7 +83,7 @@ In order to include a `cloudwatch_metrics_collector` in your launch file, you sh
 | Arg Name | Description |
 | --------- | ------------ |
 | node_name | (optional) The name the metrics node should be launched with. If not provided the node will default to "cloudwatch_metrics_collector" |
-| config_file | (optional) A path to a posparam config file. If provided the launch file will use rosparam to load the configuration into the private namespace of the node. |
+| config_file | (optional) A path to a rosparam config file. If provided the launch file will use rosparam to load the configuration into the private namespace of the node. |
 
 An example launch file called `sample_application.launch` is included in this project that gives an example of how you can include this node in your project and provide it with arguments.
 
@@ -119,7 +119,7 @@ Most users won't need to touch these parameters, they are useful if you want fin
 | Parameter Name | Description | Type | Default |
 | ------------- | -----------------------------------------------------------| ------------- | ------------ |
 | batch_max_queue_size | The maximum number metrics items to add to the CloudWatch upload queue before they start to be written to disk | *int* | 1024 |
-| batch_trigger_publish_size | Only publish metrics to CloudWatch when there are this many items in the queue. When this is set the publishing of metrics on a constant timer is disabled. This must be smaller than batch_max_queue_size | *int* | 64 |
+| batch_trigger_publish_size | Only publish metrics to CloudWatch when there are this many items in the queue. When this is set the publishing of metrics on a constant timer is disabled. This must be smaller than batch_max_queue_size. Metrics uploaded from offline storage are not affected by this. | *int* | *unset* |
 | file_max_queue_size | The max number of batches in the queue, each of size file_upload_batch_size, when reading and uploading from offline storage files | *int* | 5 |
 | file_upload_batch_size | The size of each batch of metrics in the queue, when reading and uploading from offline storage files | *int* | 50 |
 | file_prefix | A prefix to add to each offline storage file so they're easier to identify later | *string* | cwmetric |
