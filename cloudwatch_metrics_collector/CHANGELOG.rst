@@ -2,8 +2,8 @@
 Changelog for package cloudwatch_metrics_collector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.1.1 (2019-07-26)
+------------------
 * - minor README changes (`#35 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/35>`_)
   - remove debug flag (run with level info)
 * install missing library (`#33 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/33>`_)
