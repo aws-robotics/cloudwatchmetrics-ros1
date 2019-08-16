@@ -85,8 +85,6 @@ public:
    */
   bool checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
-protected:
-
   /**
    * Gets the timestamp for the input metric message as milliseconds since epoch
    */
