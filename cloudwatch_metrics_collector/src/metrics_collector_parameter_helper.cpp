@@ -235,31 +235,31 @@ void ReadFileManagerStrategyOptions(
   ReadOption(
     parameter_reader,
     kNodeParamStorageDirectory,
-    Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_directory,
+    Aws::CloudWatchMetrics::kDefaultMetricFileManagerStrategyOptions.storage_directory,
     file_manager_strategy_options.storage_directory);
 
   ReadOption(
     parameter_reader,
     kNodeParamFilePrefix,
-    Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_prefix,
+    Aws::CloudWatchMetrics::kDefaultMetricFileManagerStrategyOptions.file_prefix,
     file_manager_strategy_options.file_prefix);
 
   ReadOption(
     parameter_reader,
     kNodeParamFileExtension,
-    Aws::FileManagement::kDefaultFileManagerStrategyOptions.file_extension,
+    Aws::CloudWatchMetrics::kDefaultMetricFileManagerStrategyOptions.file_extension,
     file_manager_strategy_options.file_extension);
 
   ReadOption(
     parameter_reader,
     kNodeParamMaximumFileSize,
-    Aws::FileManagement::kDefaultFileManagerStrategyOptions.maximum_file_size_in_kb,
+    Aws::CloudWatchMetrics::kDefaultMetricFileManagerStrategyOptions.maximum_file_size_in_kb,
     file_manager_strategy_options.maximum_file_size_in_kb);
 
   ReadOption(
     parameter_reader,
     kNodeParamStorageLimit,
-    Aws::FileManagement::kDefaultFileManagerStrategyOptions.storage_limit_in_kb,
+    Aws::CloudWatchMetrics::kDefaultMetricFileManagerStrategyOptions.storage_limit_in_kb,
     file_manager_strategy_options.storage_limit_in_kb);
 }
 
