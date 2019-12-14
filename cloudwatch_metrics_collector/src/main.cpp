@@ -98,7 +98,7 @@ int main(int argc, char * argv[])
           cloudwatch_options);
 
   ros::ServiceServer service = node_handle.advertiseService(kNodeName,
-                                                            &Aws::CloudWatchMetrics::Utils::MetricsCollector::checkIfOnline,
+                                                            &Aws::CloudWatchMetrics::Utils::MetricsCollector::CheckIfOnline,
                                                             &metrics_collector);
 
   // start the collection process

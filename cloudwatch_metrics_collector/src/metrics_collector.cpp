@@ -33,6 +33,7 @@
 #include <cloudwatch_metrics_common/metric_service.hpp>
 #include <cloudwatch_metrics_common/metric_service_factory.hpp>
 #include <string>
+#include <utility>
 #include <vector>
 #include <map>
 #include <std_srvs/Trigger.h>
@@ -50,13 +51,13 @@ namespace Utils {
 void MetricsCollector::Initialize(std::string metric_namespace,
                          std::map<std::string, std::string> & default_dimensions,
                          int storage_resolution,
-                         ros::NodeHandle node_handle,
+                         const ros::NodeHandle& node_handle,
                          const Aws::Client::ClientConfiguration & config,
                          const Aws::SDKOptions & sdk_options,
                          const Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options,
-                         std::shared_ptr<MetricServiceFactory> metric_service_factory) {
+                         const std::shared_ptr<MetricServiceFactory>& metric_service_factory) {
 
-  this->metric_namespace_ = metric_namespace;
+  this->metric_namespace_ = std::move(metric_namespace);
   this->default_dimensions_ = default_dimensions;
   this->storage_resolution_.store(storage_resolution);
   this->node_handle_ = node_handle;
@@ -69,9 +70,9 @@ void MetricsCollector::Initialize(std::string metric_namespace,
 void MetricsCollector::SubscribeAllTopics()
 {
   ReadTopics(topics_);
-  for (auto it = topics_.begin(); it != topics_.end(); ++it) {
+  for (auto & topic : topics_) {
     ros::Subscriber sub = node_handle_.subscribe<ros_monitoring_msgs::MetricList>(
-            *it, kNodeSubQueueSize,
+            topic, kNodeSubQueueSize,
             [this](const ros_monitoring_msgs::MetricList::ConstPtr & metric_list_msg) -> void {
                 this->RecordMetrics(metric_list_msg);
             });
@@ -90,12 +91,12 @@ int MetricsCollector::RecordMetrics(
 
     std::map<std::string, std::string> dimensions;
 
-    for (auto it = default_dimensions_.begin(); it != default_dimensions_.end(); ++it) {
-      dimensions.emplace(it->first, it->second);  // ignore the return, if we get a duplicate we're
+    for (auto & default_dimension : default_dimensions_) {
+      dimensions.emplace(default_dimension.first, default_dimension.second);  // ignore the return, if we get a duplicate we're
                                                   // going to stick with the first one
     }
-    for (auto it = metric_msg->dimensions.begin(); it != metric_msg->dimensions.end(); ++it) {
-      dimensions.emplace((*it).name, (*it).value);  // ignore the return, if we get a duplicate
+    for (const auto & dimension : metric_msg->dimensions) {
+      dimensions.emplace(dimension.name, dimension.value);  // ignore the return, if we get a duplicate
                                                     // we're going to stick with the first one
     }
     AWS_LOGSTREAM_DEBUG(__func__, "Recording metric with name=[" << metric_msg->metric_name << "]");
@@ -123,7 +124,7 @@ int64_t MetricsCollector::GetMetricDataEpochMillis(const ros_monitoring_msgs::Me
   return metric_msg.time_stamp.toNSec() / 1000000;
 }
 
-void MetricsCollector::TriggerPublish(const ros::TimerEvent &)
+void MetricsCollector::TriggerPublish(const ros::TimerEvent & /*unused*/)
 {
   AWS_LOG_DEBUG(__func__, "Flushing metrics");
   this->metric_service_->publishBatchedData();
@@ -148,18 +149,18 @@ bool MetricsCollector::shutdown() {
   return is_shutdown;
 }
 
-bool MetricsCollector::checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
+bool MetricsCollector::CheckIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response) {
 
   AWS_LOGSTREAM_DEBUG(__func__, "received request " << request);
 
   if (!this->metric_service_) {
-    response.success = false;
+    response.success = static_cast<uint8_t>(false);
     response.message = "The MetricsCollector is not initialized";
     return true;
   }
 
-  response.success = this->metric_service_->isConnected();
-  response.message = response.success ? "The MetricsCollector is connected" : "The MetricsCollector is not connected";
+  response.success = static_cast<uint8_t>(this->metric_service_->isConnected());
+  response.message = response.success != 0u ? "The MetricsCollector is connected" : "The MetricsCollector is not connected";
 
   return true;
 }

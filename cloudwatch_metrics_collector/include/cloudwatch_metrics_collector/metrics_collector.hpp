@@ -37,7 +37,7 @@ class MetricsCollector : public Service
 public:
 
   MetricsCollector() = default;
-  ~MetricsCollector() = default;
+  ~MetricsCollector() override = default;
 
   /**
    * Accept input metric message to be batched for publishing.
@@ -50,7 +50,7 @@ public:
   /**
    * Force all batched data to be published to CloudWatch.
    */
-  void TriggerPublish(const ros::TimerEvent &);
+  void TriggerPublish(const ros::TimerEvent & /*unused*/);
 
   /**
    * Initialize the MetricsCollector with parameters read from the config file.
@@ -65,11 +65,11 @@ public:
   void Initialize(std::string metric_namespace,
                   std::map<std::string, std::string> & default_dimensions,
                   int storage_resolution,
-                  ros::NodeHandle node_handle,
+                  const ros::NodeHandle& node_handle,
                   const Aws::Client::ClientConfiguration & config,
                   const Aws::SDKOptions & sdk_options,
                   const Aws::CloudWatchMetrics::CloudWatchOptions & cloudwatch_options,
-                  std::shared_ptr<MetricServiceFactory> metric_service_factory = std::make_shared<MetricServiceFactory>());
+                  const std::shared_ptr<MetricServiceFactory>& metric_service_factory = std::make_shared<MetricServiceFactory>());
 
   void SubscribeAllTopics();
 
@@ -83,7 +83,7 @@ public:
    * @param response output response
    * @return true if the request was handled successfully, false otherwise
    */
-  bool checkIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
+  bool CheckIfOnline(std_srvs::Trigger::Request& request, std_srvs::Trigger::Response& response);
 
   /**
    * Gets the timestamp for the input metric message as milliseconds since epoch
@@ -94,7 +94,7 @@ private:
 
   std::string metric_namespace_;
   std::map<std::string, std::string> default_dimensions_;
-  std::atomic<int> storage_resolution_;
+  std::atomic<int> storage_resolution_{};
   std::shared_ptr<MetricService> metric_service_;
   std::vector<ros::Subscriber> subscriptions_;
   ros::NodeHandle node_handle_;
