@@ -22,7 +22,6 @@
 #include <unordered_set>
 #include <iostream>
 
-using namespace Aws::Client;
 
 namespace Aws {
 namespace CloudWatchMetrics {

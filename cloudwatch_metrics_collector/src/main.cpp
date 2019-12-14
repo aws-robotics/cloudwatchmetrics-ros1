@@ -42,7 +42,10 @@
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
 #include <cloudwatch_metrics_common/cloudwatch_options.h>
 
-using namespace Aws::CloudWatchMetrics::Utils;
+using Aws::CloudWatchMetrics::Utils::kNodeName;
+using Aws::CloudWatchMetrics::Utils::kNodeDefaultMetricDatumStorageResolution;
+using Aws::CloudWatchMetrics::Utils::MetricsCollector;
+
 
 int main(int argc, char * argv[])
 {
@@ -61,8 +64,8 @@ int main(int argc, char * argv[])
           std::make_shared<Aws::Client::Ros1NodeParameterReader>();
 
   //SDK client config
-  ClientConfigurationProvider client_config_provider(parameter_reader);
-  ClientConfiguration client_config = client_config_provider.GetClientConfiguration();
+  Aws::Client::ClientConfigurationProvider client_config_provider(parameter_reader);
+  Aws::Client::ClientConfiguration client_config = client_config_provider.GetClientConfiguration();
 
   Aws::SDKOptions sdk_options;
 
@@ -76,16 +79,16 @@ int main(int argc, char * argv[])
   int storage_resolution = kNodeDefaultMetricDatumStorageResolution;
   Aws::CloudWatchMetrics::CloudWatchOptions cloudwatch_options;
 
-  ReadPublishFrequency(parameter_reader, publish_frequency);
-  ReadMetricNamespace(parameter_reader, metric_namespace);
-  ReadMetricDimensions(parameter_reader, dimensions_param, default_metric_dims);
-  ReadStorageResolution(parameter_reader, storage_resolution);
+  Aws::CloudWatchMetrics::Utils::ReadPublishFrequency(parameter_reader, publish_frequency);
+  Aws::CloudWatchMetrics::Utils::ReadMetricNamespace(parameter_reader, metric_namespace);
+  Aws::CloudWatchMetrics::Utils::ReadMetricDimensions(parameter_reader, dimensions_param, default_metric_dims);
+  Aws::CloudWatchMetrics::Utils::ReadStorageResolution(parameter_reader, storage_resolution);
 
-  ReadCloudWatchOptions(parameter_reader, cloudwatch_options);
+  Aws::CloudWatchMetrics::Utils::ReadCloudWatchOptions(parameter_reader, cloudwatch_options);
   //-----------------End read configuration parameters-----------------------
 
   // create the metric collector
-  Aws::CloudWatchMetrics::Utils::MetricsCollector metrics_collector;
+  MetricsCollector metrics_collector;
 
   // initialize with options read from the config file
   metrics_collector.Initialize(
@@ -98,7 +101,7 @@ int main(int argc, char * argv[])
           cloudwatch_options);
 
   ros::ServiceServer service = node_handle.advertiseService(kNodeName,
-                                                            &Aws::CloudWatchMetrics::Utils::MetricsCollector::CheckIfOnline,
+                                                            &MetricsCollector::CheckIfOnline,
                                                             &metrics_collector);
 
   // start the collection process
@@ -112,7 +115,7 @@ int main(int argc, char * argv[])
   if (!publish_when_size_reached) {
     timer =
       node_handle.createTimer(ros::Duration(publish_frequency),
-                              &Aws::CloudWatchMetrics::Utils::MetricsCollector::TriggerPublish,
+                              &MetricsCollector::TriggerPublish,
                               &metrics_collector);
   }
 

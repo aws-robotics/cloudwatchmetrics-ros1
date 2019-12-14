@@ -40,9 +40,6 @@
 #include <std_srvs/Empty.h>
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
 
-using namespace Aws::Client;
-using namespace Aws::Utils::Logging;
-using namespace Aws::CloudWatchMetrics::Utils;
 
 namespace Aws {
 namespace CloudWatchMetrics {
