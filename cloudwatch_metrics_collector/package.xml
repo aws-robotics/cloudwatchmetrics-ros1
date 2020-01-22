@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>cloudwatch_metrics_collector</name>
-  <version>2.1.1</version>
+  <version>2.2.0</version>
   <description>Subscriber node for the aws/monitoring topic to publish metrics to AWS Cloudwatch</description>
   <url>http://wiki.ros.org/cloudwatch_metrics_collector</url>
 
