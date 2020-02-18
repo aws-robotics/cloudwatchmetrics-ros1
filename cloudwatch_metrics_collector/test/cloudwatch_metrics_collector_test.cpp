@@ -31,6 +31,7 @@
 
 using namespace Aws::CloudWatchMetrics;
 using namespace Aws::CloudWatchMetrics::Utils;
+using namespace Aws::FileManagement;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::StrEq;
