@@ -27,16 +27,14 @@
 #include <ros_monitoring_msgs/MetricData.h>
 
 #include <cloudwatch_metrics_collector/metrics_collector_parameter_helper.hpp>
+#include <utility>
 
 using namespace Aws::CloudWatchMetrics;
 using namespace Aws::CloudWatchMetrics::Utils;
+using namespace Aws::FileManagement;
 using ::testing::_;
-using ::testing::AllOf;
-using ::testing::HasSubstr;
 using ::testing::Return;
 using ::testing::StrEq;
-using ::testing::Eq;
-using ::testing::InSequence;
 
 int test_argc;
 char** test_argv;
@@ -74,7 +72,7 @@ public:
     MetricServiceMock(std::shared_ptr<Publisher<MetricDatumCollection>> publisher,
                       std::shared_ptr<DataBatcher<MetricDatum>> batcher,
                       std::shared_ptr<FileUploadStreamer<MetricDatumCollection>> file_upload_streamer = nullptr)
-            : MetricService(publisher, batcher, file_upload_streamer) {}
+            : MetricService(std::move(publisher), std::move(batcher), std::move(file_upload_streamer)) {}
 
     MOCK_METHOD1(batchData, bool(const MetricObject & data_to_batch));
     MOCK_METHOD0(start, bool());
@@ -103,7 +101,7 @@ protected:
   std::shared_ptr<ros::NodeHandle> node_handle;
   std::shared_ptr<ros::Publisher> metrics_pub;
 
-  void SetUp()
+  void SetUp() override
   {
     metric_batcher = std::make_shared<MetricBatcherMock>();
     metric_publisher = std::make_shared<MetricPublisherMock>(metric_namespace, config);
@@ -141,7 +139,7 @@ protected:
     metrics_collector->start();
   }
 
-  void TearDown() {
+  void TearDown() override {
     if(metrics_collector) {
       EXPECT_CALL(*metric_service, shutdown()).Times(1);
       metrics_collector->shutdown();
@@ -359,8 +357,8 @@ TEST_F(MetricsCollectorFixture, metricRecordedWithDefaultDimensions)
 TEST_F(MetricsCollectorFixture, customTopicsListened)
 {
   std::vector<std::string> topics;
-  topics.push_back("metrics_topic0");
-  topics.push_back("metrics_topic1");
+  topics.emplace_back("metrics_topic0");
+  topics.emplace_back("metrics_topic1");
   ros::param::set(kNodeParamMonitorTopicsListKey, topics);
 
   std::map<std::string, std::string> default_metric_dims;
