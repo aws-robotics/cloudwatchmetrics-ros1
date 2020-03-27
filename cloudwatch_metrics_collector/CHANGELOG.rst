@@ -2,8 +2,8 @@
 Changelog for package cloudwatch_metrics_collector
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.1 (2020-03-27)
+------------------
 * Bumpinng package version to match bloom release (`#45 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/45>`_)
   Bump version to 2.2.1
 * Fix linting issues found by clang-tidy 6.0 (`#43 <https://github.com/aws-robotics/cloudwatchmetrics-ros1/issues/43>`_)
