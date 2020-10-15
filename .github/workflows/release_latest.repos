@@ -1,5 +1,5 @@
 repositories:
-  cloudwatchmetrics-ros1
+  cloudwatchmetrics-ros1:
     type: git
     url: https://github.com/aws-robotics/cloudwatchmetrics-ros1
     version: release-latest
