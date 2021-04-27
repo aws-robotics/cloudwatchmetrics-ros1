@@ -48,6 +48,8 @@ using Aws::CloudWatchMetrics::Utils::MetricsCollector;
 
 int main(int argc, char * argv[])
 {
+  Aws::SDKOptions options;
+  Aws::InitAPI(options);
   int status = 0;
   ros::init(argc, argv, kNodeName);
   ros::NodeHandle node_handle;
@@ -124,5 +126,6 @@ int main(int argc, char * argv[])
   metrics_collector.shutdown();
   Aws::Utils::Logging::ShutdownAWSLogging();
   ros::shutdown();
+  Aws::ShutdownAPI(options);
   return status;
 }
