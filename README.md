@@ -28,12 +28,6 @@ You will need to create an AWS Account and configure the credentials to be able 
 This node will require the following AWS account IAM role permissions:
 - `cloudwatch:PutMetricData`
 
-### Binaries
-On Ubuntu you can install the latest version of this package using the following command
-
-        sudo apt-get update
-        sudo apt-get install -y ros-$ROS_DISTRO-cloudwatch-metrics-collector
-
 ### Building from Source
 
 To build from source you'll need to create a new workspace, clone and checkout the latest release branch of this repository, install all the dependencies, and compile. If you need the latest development features you can clone from the `master` branch instead of the latest release branch. While we guarantee the release branches are stable, __the `master` should be considered to have an unstable build__ due to ongoing development. 
@@ -138,13 +132,6 @@ None
 
 #### Services
 None
-
-
-## Bugs & Feature Requests
-Please contact the team directly if you would like to request a feature.
-
-Please report bugs in [Issue Tracker].
-
 
 [Amazon Web Services (AWS)]: https://aws.amazon.com/
 [Apache 2.0]: https://aws.amazon.com/apache-2-0/
